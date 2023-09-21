@@ -10,83 +10,67 @@ from viktor.views import (
   DataItem,
   PlotlyView, 
   PlotlyResult,
+  ImageView, 
+  ImageResult,
 )
+from pathlib import Path
 from munch import Munch
-
-def validate_step_1(params, **kwargs):
-  """Validates step 1."""
-  if not params.step_1.point:
-    raise UserError("Select something")
-  if params.step_1.surface == 0:
-    raise UserError("Bigger area needed")
-
-class Parametrization(ViktorParametrization):
-
-  step_1 = Step("Starting off",
-    views="get_geometry_view", 
-  )
-
-  step_1.text1 = Text (
-    """ Welcome to this app, that I'm trying to build!
-
-    I hope we can get along
-    
-    ##User Information
-
-    XXXX
-    
-    ##Choose input
-    """
-  )
-    
-  step_1.x = NumberField(
-    "BIPV(T) surface area", 
-    suffix="m2",
-    default=20,
-    min=1,
-    max=200,
-    description="Use decimal point instead of comma",
-    )
-  
-  step_1.z = OptionField(
-    "Anlagentyp",
-    options=["BIPV Dachintegriert", "BIPVT Dachintegriert"],
-    default="BIPV Dachintegriert",
-    autoselect_single_option=True,
-    )
-  
-  step_2 = Step("More Input", views="get_data_view")
-
-  step_2.text2 = Text (
-    """ Here are going to be more Inputs necessary"""
-  )
-
-  step_3 = Step("Outputs",views="get_plotly_view")
-
-  step_3.text3 = Text ("Hi")
-
-
+from parametrization import Parametrization
 
 class ExampeType(ViktorController):
     viktor_enforce_field_constraints = True
     label = "Example Type"
     parametrization = Parametrization
 
-    @GeometryView('3D Geo', duration_guess=1) #for step 1
-    def get_geometry_view(self, params, **kwargs):
-      geometry = Sphere(Point(0,0,0), radius=10)
-      return GeometryResult(geometry)
+    @ImageView('Start', duration_guess=1) #for step 1
+    def get_image_view(self, params, **kwargs):
+     image_path = Path(__file__).parent / 'try_first.jpg'
+     return ImageResult.from_path(image_path)
 
-    @DataView('Data', duration_guess=1) #for step 2
-    def get_data_view(self, params, **kwargs):
-      Ertrag = params.step_1.x * 1000
-      Fantasie = params.step_1.z
+    @DataView('Erträge', duration_guess=10)
+    def get_Erträge_view(self, params, **kwargs):
+      return DataResult()
+    
+    @DataView('energiebezogene Kennzahlen', duration_guess=10)
+    def get_Energie_view(self, params, **kwargs):
+      return DataResult()
+    
+    @DataView('Data', duration_guess=10) #for step 2
+    def get_data_view(self, params: Munch, **kwargs):
 
-      main_data_group = DataGroup(
-        DataItem('jährlicher solarer Ertrag', Ertrag),
-        DataItem('Anlagenkonfiguration', Fantasie),
+      if params.step_1.GA == "Neubau" or "Sanierung" :
+        GA = 45
+      if params.step_1.GA == "Bestandsgebäude" :
+        GA = 100
+      
+      Heizwärmebedarf = DataItem (
+        label="Jahresenergiebedarf Wärme", 
+        value = GA * params.step_1.Wf,
+        suffix = "kWh",
+        number_of_decimals=0,
       )
+      
+      if params.step_1.WE<3:
+        BedarfTWW = 500 * params.step_1.Pers
+      if params.step_1.WE>2:   
+        BedarfTWW = 1000 * params.step_1.WE
+
+      BedarfTWW = DataItem(
+        label="Jahresenergiebedarf Trinkwarmwasser", 
+        value = BedarfTWW, 
+        suffix="kWh", 
+        number_of_decimals=0,
+      )
+
+      # Strombedarf = aus Tabelle ablesen 
+
+      main_data_group = DataGroup(Heizwärmebedarf, BedarfTWW)
       return DataResult(main_data_group)
+
+    @ImageView('Start', duration_guess=1) #for step 2
+    def get_image2_view(self, params, **kwargs):
+     image_path = Path(__file__).parent / 'try_first.jpg'
+     return ImageResult.from_path(image_path)  
 
     @PlotlyView("Plot", duration_guess=10) #for step 3
     def get_plotly_view(self, params: Munch, **kwargs):
