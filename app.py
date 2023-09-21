@@ -10,6 +10,8 @@ from viktor.views import (
   DataItem,
   PlotlyView, 
   PlotlyResult,
+  PlotlyAndDataView,
+  PlotlyAndDataResult,
   ImageView, 
   ImageResult,
 )
@@ -22,20 +24,25 @@ class ExampeType(ViktorController):
     label = "Example Type"
     parametrization = Parametrization
 
-    @ImageView('Start', duration_guess=1) #for step 1
+    @ImageView('', duration_guess=1) #for step 1
     def get_image_view(self, params, **kwargs):
      image_path = Path(__file__).parent / 'try_first.jpg'
      return ImageResult.from_path(image_path)
 
-    @DataView('Erträge', duration_guess=10)
+    @ImageView('Anlagentypen', duration_guess=1) #for step 2
+    def get_image2_view(self, params, **kwargs):
+     image_path = Path(__file__).parent / 'try_first.jpg'
+     return ImageResult.from_path(image_path) 
+
+    @DataView('Erträge', duration_guess=10) #for step 2
     def get_Erträge_view(self, params, **kwargs):
       return DataResult()
     
-    @DataView('energiebezogene Kennzahlen', duration_guess=10)
+    @DataView('energiebezogene Kennzahlen', duration_guess=10) #for step 2
     def get_Energie_view(self, params, **kwargs):
       return DataResult()
     
-    @DataView('Data', duration_guess=10) #for step 2
+    @DataView('Data', duration_guess=10) #for step ?
     def get_data_view(self, params: Munch, **kwargs):
 
       if params.step_1.GA == "Neubau" or "Sanierung" :
@@ -67,12 +74,14 @@ class ExampeType(ViktorController):
       main_data_group = DataGroup(Heizwärmebedarf, BedarfTWW)
       return DataResult(main_data_group)
 
-    @ImageView('Start', duration_guess=1) #for step 2
-    def get_image2_view(self, params, **kwargs):
-     image_path = Path(__file__).parent / 'try_first.jpg'
-     return ImageResult.from_path(image_path)  
+     
 
-    @PlotlyView("Plot", duration_guess=10) #for step 3
-    def get_plotly_view(self, params: Munch, **kwargs):
+    @PlotlyAndDataView("ökologische Kennzahlen", duration_guess=10) #for step 3
+    def get_plotlyÖko_view(self, params: Munch, **kwargs):
       """Shows the plot"""
-      return PlotlyResult(fig)
+      return PlotlyAndDataResult(fig)
+    
+    @PlotlyAndDataView('wirtschaftliche Kennzahlen', duration_guess=10) #for step 3
+    def get_plotlyWirt_view(self, params: Munch, **kwargs):
+      return PlotlyAndDataResult(fig)
+

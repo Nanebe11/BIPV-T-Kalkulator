@@ -49,6 +49,7 @@ class Parametrization(ViktorParametrization):
     options=['Neubau', 'Sanierung', 'Bestandsgebäude'], 
     variant='radio-inline'
   ) 
+# hier neue Zeile in Darstellung
 
   step_1.WE = IntegerField(
     "Anzahl Wohneinheiten", 
@@ -191,7 +192,7 @@ class Parametrization(ViktorParametrization):
     default="bis 31.01.2024",
   )
 
-  step_3 = Step("Summary",views=["get_plotly_view", "get_image_view"])
+  step_3 = Step("Summary",views=["get_plotlyÖko_view", "get_plotlyWirt_view"])
 
   step_3.text4 = Text (
     """ Hi, 
