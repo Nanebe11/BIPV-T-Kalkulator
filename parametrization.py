@@ -49,8 +49,10 @@ class Parametrization(ViktorParametrization):
     options=['Neubau', 'Sanierung', 'Bestandsgebäude'], 
     variant='radio-inline'
   ) 
-# hier neue Zeile in Darstellung
 
+  step_1.texta = Text( 
+    """  """
+  )
   step_1.WE = IntegerField(
     "Anzahl Wohneinheiten", 
     suffix="WE",
@@ -62,12 +64,12 @@ class Parametrization(ViktorParametrization):
 
   if Lookup('step_1.WE') == 1 or 2:
     step_1.Pers = IntegerField( #dieses Feld ist nur erforderlich für WE>2 
-    "Anzahl Personen", 
-    suffix="Personen",
-    default=1,
-    min=1,
-    max=6,
-    description="Anzahl der Personen, die in dem Gebäude leben",
+     "Anzahl Personen", 
+     suffix="Personen",
+     default=1,
+     min=1,
+     max=6,
+     description="Anzahl der Personen, die in dem Gebäude leben; Nur erforderlich wenn mehr als 2 Wohneinheiten",
     )
   
   step_1.Wf = NumberField(
@@ -77,8 +79,14 @@ class Parametrization(ViktorParametrization):
     description="Zusammengerechnete beheizte Wohnfläche alle Wohneinheiten"
   )
 
+  step_1.Energiebedarf = NumberField(
+    "Jahresenergiebedarf",
+    suffix="kWh",
+   # default= get_Jahresenergiebedarf,
+    description="Kann beispielsweise aus dem Energieausweis abgelesen werden"
+  )
+
   step_1.text2 = Text("""
-  
   Bitte geben Sie im folgenden die Art der aktuellen Wärmeerzeugung an. 
   Diese Information wird berücksichtigt, um die ökologischen Kennzahlen zu berechnen. 
   Dabei werden die Auswirkungen eines Gebäudes mit BIPV(T)-Anlage mit denen eines Vergleichsgebäudes verglichen.
@@ -91,21 +99,19 @@ class Parametrization(ViktorParametrization):
     variant='radio-inline',
     description="Bei Neubauten bitte alternative Wärmeerzeugung wählen (Vergleichswert)",
   )
-
-  step_1.Energiebedarf = NumberField(
-    "Jahresenergiebedarf",
-    suffix="kWh",
-   # default= get_Jahresenergiebedarf,
-    description="Kann beispielsweise aus dem Energieausweis abgelesen werden"
-  )
   
   step_2 = Step("Anlagenkonfiguration", views=["get_image2_view","get_Erträge_view", "get_Energie_view"])
 
   step_2.text3 = Text (
-    """ Here are going to be more Inputs necessary"""
+    """ Im folgenden müssen Sie einige Informationen zu der geplanten BIPV(T)-Anlage treffen"""
   )
-
-  step_2.textA1 = Text ("BIPV-Anlage Dachintegriert")
+  
+  step_2.textA1 = Text ("""BIPV-Anlage Dachintegriert
+    Diese Anlage wird in die Dachfläche eines Gebäudes integriert, 
+    die Photovoltaikmodule erzeugen dabei elektrische Energie der im Gebäude genutzt werden oder eingespeist werden kann.
+  
+    Eine Beispielhafte Ansicht können Sie rechts (Bild 1) sehen."""
+  )
 
   step_2.Area1 = NumberField(
     "Fläche der PV-Anlage", 
@@ -127,7 +133,13 @@ class Parametrization(ViktorParametrization):
     description="Die nächstmögliche Neigung wählen, für Flachdächer 5°", 
   )
 
-  step_2.textA2 = Text ("BIPVT-Anlage Dachintegriert")
+  step_2.textA2 = Text ("""BIPVT-Anlage Dachintegriert
+    Diese Anlage wird ebenfalls in die Dachfläche eines Gebäudes integriert, 
+    die Photovoltaikmodule erzeugen dabei elektrische Energie der im Gebäude genutzt werden oder eingespeist werden kann.
+   Zusätzlich wird über darunter liegende Kollektoren thermische Energie erzeugt.
+  
+    Eine Beispielhafte Ansicht können Sie rechts (Bild 2) sehen."""
+  )
 
   step_2.Area2 = NumberField(
     "Fläche der PVT-Anlage", 
@@ -149,7 +161,12 @@ class Parametrization(ViktorParametrization):
     description="Die nächstmögliche Neigung wählen, für Flachdächer 5°", 
   )
 
-  step_2.textA3 = Text ("BIPV-Anlage Fassadenintegriert")
+  step_2.textA3 = Text ("""BIPV-Anlage Fassadenintegriert
+   Diese Anlage wird in die Fassade/ Wandfläche eines Gebäudes integriert, 
+   die Photovoltaikmodule erzeugen dabei elektrische Energie der im Gebäude genutzt werden oder eingespeist werden kann.
+  
+    Eine Beispielhafte Ansicht können Sie rechts (Bild 3) sehen."""
+  )
 
   step_2.Area3 = NumberField(
     "Fläche der PV-Anlage", 
@@ -164,7 +181,13 @@ class Parametrization(ViktorParametrization):
     default="Süd", 
   )
 
-  step_2.textA4 = Text ("BIPVT-Anlage Fassadenintegriert")
+  step_2.textA4 = Text ("""BIPVT-Anlage Fassadenintegriert
+    Diese Anlage wird in die Fassade/ Wandfläche eines Gebäudes integriert, 
+    die Photovoltaikmodule erzeugen dabei elektrische Energie der im Gebäude genutzt werden oder eingespeist werden kann.
+    Zusätzlich wird über darunter liegende Kollektoren thermische Energie erzeugt.
+  
+    Eine Beispielhafte Ansicht können Sie rechts (Bild 4) sehen."""
+  )
 
   step_2.Area4 = NumberField(
     "Fläche der PV-Anlage", 
@@ -195,8 +218,10 @@ class Parametrization(ViktorParametrization):
   step_3 = Step("Summary",views=["get_plotlyÖko_view", "get_plotlyWirt_view"])
 
   step_3.text4 = Text (
-    """ Hi, 
-    this is the summary,
-    I hope you got all the information you needed to make a solid decision!
+    """ In diesem Schritt werden die Ergebnisse der Kalkulation dargestellt. 
     
-    Thanks for using this tool""")
+    In den ökologischen Kennzahlen finden Sie Vergleichswerte darüber, wie viel Primärenergie und CO2-Äquivalent eingespart werden können. 
+    
+    In den wirtschaftlichen Kennzahlen finden Sie den Break-Even-Point der Anlage. 
+    Das bedeutet es wird mit Hilfe der Amortisationsrechnung bestimmt nach wie vielen Jahre die Investitionskosten durch Erträge wieder eingenommen wurden."""
+  )
