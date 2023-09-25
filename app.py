@@ -1,5 +1,6 @@
-from viktor import ViktorController
+from viktor import ViktorController, File
 from viktor.geometry import Point, Sphere
+from viktor.external.spreadsheet import SpreadsheetCalculation, SpreadsheetCalculationInput
 from viktor.parametrization import ViktorParametrization, NumberField, OptionField, Text, Step
 from viktor.views import (
   GeometryView, 
@@ -34,99 +35,77 @@ class ExampeType(ViktorController):
      image_path = Path(__file__).parent / 'try_first.jpg'
      return ImageResult.from_path(image_path) 
 
-    @DataView('Erträge', duration_guess=10) #for step 2
-    def get_Erträge_view(self, params: Munch, **kwargs):
-
-      JährlicherEnergieeintragBIPV = DataItem(
-        label="jährlicher Energieertrag BIPV",
-        value=0,
-        #value= aus tabelle,
-        suffix ="kWh/a",
-        number_of_decimals=0
-      )
-
-      JährlicherEnergieeintragBIPVT = DataItem(
-        label="jährlicher Energieertrag BIPVT",
-        value= AnteilBIPVTthermisch + AnteilBIPVTelektrisch,
-        suffix="kWh/a",
-        number_of_decimals=0
-      )
-
-      AnteilBIPVTthermisch = DataItem(
-        label="Anteil thermischer Energie (BIPVT)",
-        value=710* (step_2.Area2 + step_2.Area4),
-        suffix="kWh/a",
-        number_of_decimals=0
-      )
-
-      AnteilBIPVTelektrisch = DataItem(
-        label="Anteil elektrischer Energie (BIPVT)",
-        value=0,
-        #value= aus tabelle
-        suffix="kWh/a", 
-        number_of_decimals=0
+    @DataView('Erträge', duration_guess=5) #for step 2
+    def get_Erträge_view(self, params: Munch, **kwargs: dict) ->DataResult:
+      input_list = [
+        SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
+        SpreadsheetCalculationInput("Anzahl WE", params.step_1.WE),
+        SpreadsheetCalculationInput("Anzahl Personen", params.step_1.Pers),
+        SpreadsheetCalculationInput("Wohnfläche", params.step_1.Wf),
+        SpreadsheetCalculationInput("aktuelle Wärmeerzeugung", params.step_1.Wä),
+      ]
+      excel_file_path = Path(__file__).parent / "erträge.xlsx"
+      workbook = File.from_path(excel_file_path)
+      sheet = SpreadsheetCalculation(workbook, input_list)
+      result = sheet.evaluate()
+      data_groupe = DataGroup(
+        DataItem(
+          JährlicherEnergieeintragBIPV = DataItem(
+          label="jährlicher Energieertrag BIPV",
+          value=0,
+          suffix ="kWh/a"),
+        DataItem(
+          label="jährlicher Energieertrag BIPVT",
+          value= AnteilBIPVTthermisch + AnteilBIPVTelektrisch,
+          suffix="kWh/a"),
+        DataItem(
+          label="Anteil thermischer Energie (BIPVT)",
+         value=710* (step_2.Area2 + step_2.Area4),
+          suffix="kWh/a"),
+        DataItem(
+          label="Anteil elektrischer Energie (BIPVT)",
+          value=0,
+          suffix="kWh/a")
       )
       return DataResult()
 
-    @DataView('energiebezogene Kennzahlen', duration_guess=10) #for step 2
-    def get_Energie_view(self, params, **kwargs):
+    @DataView('energiebezogene Kennzahlen', duration_guess=5) #for step 2
+    def get_Energie_view(self, params: Munch, **kwargs: dict)-> DataResult:
+      input_list = [
+        SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
+        SpreadsheetCalculationInput("Anzahl WE", params.step_1.WE),
+        SpreadsheetCalculationInput("Anzahl Personen", params.step_1.Pers),
+        SpreadsheetCalculationInput("Wohnfläche", params.step_1.Wf),
+        SpreadsheetCalculationInput("aktuelle Wärmeerzeugung", params.step_1.Wä),
+      ]
+      excel_file_path = Path(__file__).parent / "energie_bedarf.xlsx"
+      workbook = File.from_path(excel_file_path)
+      sheet = SpreadsheetCalculation(workbook, input_list)
+      result = sheet.evaluate()
+      data_group = DataGroup(
+        DataItem(
+          label="Jahresenergiebedarf Wärme",
+          explanation_label="",
+          value=result.values["Jahresenergiebedarf_Wärme"],
+          suffix="kWh/a"),
+        DataItem(
+          label="Jahresenergiebedarf TWW",
+          explanation_label="",
+          value=result.values["Jahresenergiebedarf_TWW"],
+          suffix="kWh/a"),
+        DataItem(
+          label="Jahresenergiebedarf Strom",
+          explanation_label="",
+          value=result.values["Jahresenergiebedarf_Strom"],
+          suffix="kWh/a"),
+        DataItem(
+          label="Jahresenergiebedarf Gesamt",
+          explanation_label="",
+          value=result.values["Jahresenergiebedarf_Gesamt"],
+          suffix="kWh/a")
+        )
+      return DataResult(data_group)
 
-      if params.step_1.GA == "Neubau" or "Sanierung" :
-        GA = 45
-      if params.step_1.GA == "Bestandsgebäude" :
-        GA = 100
-      
-      Heizwärmebedarf = DataItem (
-        label="Jahresenergiebedarf Wärme", 
-        value = GA * params.step_1.Wf,
-        suffix = "kWh",
-        number_of_decimals=0,
-      )
-      
-      if params.step_1.WE<3:
-        BedarfTWW = 500 * params.step_1.Pers
-      if params.step_1.WE>2:   
-        BedarfTWW = 1000 * params.step_1.WE
-
-      BedarfTWW = DataItem(
-        label="Jahresenergiebedarf Trinkwarmwasser", 
-        value = BedarfTWW, 
-        suffix="kWh", 
-        number_of_decimals=0,
-      )
-
-      # Strombedarf = aus Tabelle ablesen 
-
-      Jahresenergiebedarf = DataItem(
-        label="Jahresenergiebedarf Gesamt",
-        value = Heizwärmebedarf + BedarfTWW,
-        suffix="kWh/a",
-        number_of_decimals=0
-      )
-
-      #nutzbarer Anteil am elektrischen Ertrag bestimmen hier Annahme 30%
-
-      jährlichNutzbarElek = DataItem(
-        label="jährlich nutbare Energie elektrisch",
-        value=(JährlicherEnergieeintragBIPV+AnteilBIPVTelektrisch)*0.3,
-        suffix="kWh/a",
-      )
-
-      jährlichEinspeis = DataItem(
-        label="jährlich eingespeiste Energie",
-        value=(JährlicherEnergieeintragBIPV+AnteilBIPVTelektrisch)-jährlichNutzbarElek,
-        suffix="kWh/a"
-      )
-
-      jährlichNutzbarTherm = DataItem(
-        label="jährlich nutzbare Energie thermisch",
-        value= AnteilBIPVTthermisch,
-        suffix="kWh/a"
-      )
-
-      main_data_group = DataGroup(Heizwärmebedarf, BedarfTWW, Jahresenergiebedarf)
-      return DataResult(main_data_group)
-    
     @DataView('Data', duration_guess=10) #for step ?
     def get_data_view(self, params: Munch, **kwargs):
       return DataResult()
@@ -141,4 +120,5 @@ class ExampeType(ViktorController):
     @PlotlyAndDataView('wirtschaftliche Kennzahlen', duration_guess=10) #for step 3
     def get_plotlyWirt_view(self, params: Munch, **kwargs):
       return PlotlyAndDataResult(fig)
+
 

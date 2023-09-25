@@ -8,23 +8,6 @@ from viktor.parametrization import (
     Lookup,
 )
 
-#def get_Jahresenergiebedarf(params, **kwargs):
-  #if params.step_1.GA == "Neubau" or "Sanierung" :
-       # GA = 45
-  #if params.step_1.GA == "Bestandsgebäude" :
-   #     GA = 100
-      
- # Heizwärmebedarf = GA * params.step_1.Wf,
-#
- #if params.step_1.WE<3:
-#      BedarfTWW = 500 * params.step_1.Pers
- # i#f params.step_1.WE>2:   
-  #      BedarfTWW = 1000 * params.step_1.WE
-
-  #Jahresenergiebedarf == Heizwärmebedarf + BedarfTWW  
-  #return param.Jahresenergiebedarf
-
-
 class Parametrization(ViktorParametrization):
 
   step_1 = Step("Start", views="get_image_view")
@@ -53,6 +36,7 @@ class Parametrization(ViktorParametrization):
   step_1.texta = Text( 
     """  """
   )
+
   step_1.WE = IntegerField(
     "Anzahl Wohneinheiten", 
     suffix="WE",
@@ -62,29 +46,29 @@ class Parametrization(ViktorParametrization):
     description="Anzahl der getrennt lebenden Haushalte in einem Gebäude mit gemeinsamer Warmwassererzeugung und Heizungsanlage",
     )
 
-  if Lookup('step_1.WE') == 1 or 2:
-    step_1.Pers = IntegerField( #dieses Feld ist nur erforderlich für WE>2 
+  step_1.Pers = IntegerField( #dieses Feld ist nur erforderlich für WE>2 
      "Anzahl Personen", 
      suffix="Personen",
      default=1,
      min=1,
-     max=6,
+     max=50,
      description="Anzahl der Personen, die in dem Gebäude leben; Nur erforderlich wenn mehr als 2 Wohneinheiten",
     )
   
   step_1.Wf = NumberField(
     "Wohnfläche", 
     suffix="m2", 
+    default=50,
     min=5,
     description="Zusammengerechnete beheizte Wohnfläche alle Wohneinheiten"
   )
 
-  step_1.Energiebedarf = NumberField(
-    "Jahresenergiebedarf",
-    suffix="kWh",
+  #step_1.Energiebedarf = NumberField(
+    #"Jahresenergiebedarf",
+   # suffix="kWh",
    # default= get_Jahresenergiebedarf,
-    description="Kann beispielsweise aus dem Energieausweis abgelesen werden"
-  )
+   # description="Kann beispielsweise aus dem Energieausweis abgelesen werden"
+ # )
 
   step_1.text2 = Text("""
   Bitte geben Sie im folgenden die Art der aktuellen Wärmeerzeugung an. 
