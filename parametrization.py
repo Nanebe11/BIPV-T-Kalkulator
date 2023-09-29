@@ -30,6 +30,7 @@ class Parametrization(ViktorParametrization):
   step_1.GA = OptionField(
     "Gebäudeart", 
     options=['Neubau', 'Sanierung', 'Bestandsgebäude'], 
+    default="Neubau",
     variant='radio-inline'
   ) 
 
@@ -199,7 +200,7 @@ class Parametrization(ViktorParametrization):
   )
   step_2.Speicher = OptionField(
     "Anlage mit Stromspeicher",
-    options=["Mit Stromspeicher","ohne Stromspeicher"], 
+    options=["ja","nein"], 
     variant='radio-inline',
     description="Durch einen Stromspeicher kann ein höherer Anteil des produzierten Stroms verwendet werden (vgl. Lastmanagement)",
   )
@@ -210,10 +211,10 @@ class Parametrization(ViktorParametrization):
   )
   step_2.Förder2 = OptionField(
     "Ladesäule für Elektromobilität", 
-    options=["ja, Ladesäule einplanen", "nein, nicht erforderlich"]
+    options=["ja", "nein, nicht erforderlich"]
   )
 
-  step_3 = Step("Ergebnis",views=["get_plotlyÖko_view", "get_plotlyWirt_view"])
+  step_3 = Step("Ergebnis",views=["get_plotlyÖko1_view", "get_plotlyÖko2_view", "get_plotlyWirt_view"])
 
   step_3.text4 = Text (
     """ In diesem Schritt werden die Ergebnisse der Kalkulation dargestellt. 
