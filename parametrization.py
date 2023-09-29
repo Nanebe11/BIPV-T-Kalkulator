@@ -63,12 +63,12 @@ class Parametrization(ViktorParametrization):
     description="Zusammengerechnete beheizte Wohnfläche alle Wohneinheiten"
   )
 
-  #step_1.Energiebedarf = NumberField(
-    #"Jahresenergiebedarf",
-   # suffix="kWh",
-   # default= get_Jahresenergiebedarf,
-   # description="Kann beispielsweise aus dem Energieausweis abgelesen werden"
- # )
+  step_1.Energiebedarf = NumberField(
+    "Jahresenergiebedarf",
+    suffix="kWh",
+    default=0,
+    description="Nur eintragen, wenn dieser bekannt ist. Kann beispielsweise aus dem Energieausweis abgelesen werden"
+  )
 
   step_1.text2 = Text("""
   Bitte geben Sie im folgenden die Art der aktuellen Wärmeerzeugung an. 
@@ -100,7 +100,8 @@ class Parametrization(ViktorParametrization):
   step_2.Area1 = NumberField(
     "Fläche der PV-Anlage", 
     suffix="m2", 
-    min=1,
+    default=0,
+    min=0,
     max=500,
   )
 
@@ -127,8 +128,9 @@ class Parametrization(ViktorParametrization):
 
   step_2.Area2 = NumberField(
     "Fläche der PVT-Anlage", 
-    suffix="m2", 
-    min=1,
+    suffix="m2",
+    default=0, 
+    min=0,
     max=500,
   )
 
@@ -155,7 +157,8 @@ class Parametrization(ViktorParametrization):
   step_2.Area3 = NumberField(
     "Fläche der PV-Anlage", 
     suffix="m2", 
-    min=1,
+    default=0,
+    min=0,
     max=500,
   )
 
@@ -176,7 +179,8 @@ class Parametrization(ViktorParametrization):
   step_2.Area4 = NumberField(
     "Fläche der PV-Anlage", 
     suffix="m2", 
-    min=1,
+    default=0,
+    min=0,
     max=500,
   )
 
@@ -186,20 +190,30 @@ class Parametrization(ViktorParametrization):
     default="Süd", 
   )
 
-  step_2.Speicher = OptionField(
-    "Anlage mit Stromspeicher",
-    options=["Mit Stromspeicher","ohne Stromspeicher"], 
-    variant='radio-inline',
-    description="Durch einen Stromspeicher kann ein höherer Anteil des produzierten Stroms verwendet werden (vgl. Lastmanagement)",
-  )
+  step_2.textb = Text (" ")
   
   step_2.Inbetrieb = OptionField(
     "Inbetriebnahme-Zeitpunkt der Anlage", 
     options=["bis 31.01.2024", "ab 01.02.2024", "ab 01.08.2024", "ab 01.02.2025", "ab 01.08.2025", "ab 01.02.2026"], 
     default="bis 31.01.2024",
   )
+  step_2.Speicher = OptionField(
+    "Anlage mit Stromspeicher",
+    options=["Mit Stromspeicher","ohne Stromspeicher"], 
+    variant='radio-inline',
+    description="Durch einen Stromspeicher kann ein höherer Anteil des produzierten Stroms verwendet werden (vgl. Lastmanagement)",
+  )
+  step_2.Förder1 = OptionField(
+    "Elektroauto im Haushalt",
+    options=["ja","nein"],
+    description="Ist eine im Haushalt lebende Person in Besitz eines Elektroautos? (Hybridfahrzeuge sind nicht eingeschlossen)"
+  )
+  step_2.Förder2 = OptionField(
+    "Ladesäule für Elektromobilität", 
+    options=["ja, Ladesäule einplanen", "nein, nicht erforderlich"]
+  )
 
-  step_3 = Step("Summary",views=["get_plotlyÖko_view", "get_plotlyWirt_view"])
+  step_3 = Step("Ergebnis",views=["get_plotlyÖko_view", "get_plotlyWirt_view"])
 
   step_3.text4 = Text (
     """ In diesem Schritt werden die Ergebnisse der Kalkulation dargestellt. 
