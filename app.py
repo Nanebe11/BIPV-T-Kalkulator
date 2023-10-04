@@ -1,7 +1,9 @@
 from pathlib import Path
 from munch import Munch
 
+import numpy as np
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 
 from viktor import ViktorController, File
@@ -28,7 +30,7 @@ from parametrization import Parametrization
 class ExampeType(ViktorController):
     viktor_enforce_field_constraints = True
     label = "Example Type"
-    parametrization = Parametrization
+    parametrization = Parametrization (width=40)
 
     @ImageView('', duration_guess=1) #for step 1
     def get_image_view(self, params, **kwargs):
@@ -37,7 +39,7 @@ class ExampeType(ViktorController):
 
     @ImageView('Anlagentypen', duration_guess=1) #for step 2
     def get_image2_view(self, params, **kwargs):
-     image_path = Path(__file__).parent / 'try_first.jpg'
+     image_path = Path(__file__).parent / 'Darstellung.jpg'
      return ImageResult.from_path(image_path) 
 
     @DataView('Erträge', duration_guess=10) #for step 2
@@ -63,19 +65,19 @@ class ExampeType(ViktorController):
       data_groupe = DataGroup(
         DataItem(
           label="jährlicher Energieertrag BIPV (elektrisch)",
-          value=result.values["jährlicher Energieertrag BIPV (elektrisch)"],
+          value=round(result.values["jährlicher Energieertrag BIPV (elektrisch)"], 0),
           suffix ="kWh/a"),
         DataItem(
           label="jährlicher Energieertrag BIPVT",
-          value=result.values["jährlicher Energieertrag BIPVT"],
+          value=round(result.values["jährlicher Energieertrag BIPVT"],0),
           suffix="kWh/a"),
         DataItem(
           label="Anteil elektrischer Energie (BIPVT)",
-         value=result.values["Anteil elektrische Energie an BIPVT"],
+         value=round(result.values["Anteil elektrische Energie an BIPVT"],0),
           suffix="kWh/a"),
         DataItem(
           label="Anteil thermischer Energie (BIPVT)",
-          value=result.values["Anteil thermische Energie an BIPVT"],
+          value=round(result.values["Anteil thermische Energie an BIPVT"],0),
           suffix="kWh/a")
         )
       return DataResult(data_groupe)
@@ -108,34 +110,34 @@ class ExampeType(ViktorController):
         DataItem(
           label="Jahresenergiebedarf Wärme",
           explanation_label="",
-          value=result.values["Jahresenergiebedarf_Wärme"],
+          value=round(result.values["Jahresenergiebedarf_Wärme"],0),
           suffix="kWh/a"),
         DataItem(
           label="Jahresenergiebedarf TWW",
           explanation_label="",
-          value=result.values["Jahresenergiebedarf_TWW"],
+          value=round(result.values["Jahresenergiebedarf_TWW"],0),
           suffix="kWh/a"),
         DataItem(
           label="Jahresenergiebedarf Strom",
           explanation_label="",
-          value=result.values["Jahresenergiebedarf_Strom"],
+          value=round(result.values["Jahresenergiebedarf_Strom"],0),
           suffix="kWh/a"),
         DataItem(
           label="Jahresenergiebedarf Gesamt",
           explanation_label="",
-          value=result.values["Jahresenergiebedarf_Gesamt"],
+          value=round(result.values["Jahresenergiebedarf_Gesamt"],0),
           suffix="kWh/a"),
         DataItem(
           label="Jährlich nutzbare Strommenge aus BIPV(T)",
-          value=result.values["jährlich_nutzbar_elektrisch"],
+          value=round(result.values["jährlich_nutzbar_elektrisch"],0),
           suffix="kWh/a"),
         DataItem(
           label="Jährlich eingespeiste Strommenge aus BIPV(T)",
-          value=result.values["jährlich_einspeis_elektrisch"],
+          value=round(result.values["jährlich_einspeis_elektrisch"],0),
           suffix="kWh/a"),
         DataItem(
           label="Jährlich nutzbare Wärmemenge aus BIPVT",
-          value=result.values["jährlich_nutzbar_thermisch"],
+          value=round(result.values["jährlich_nutzbar_thermisch"],0),
           suffix="kWh/a"),
         )
       return DataResult(data_group)
@@ -179,7 +181,7 @@ class ExampeType(ViktorController):
           suffix="kWh/a"),
         DataItem(
           label="mit BIPV(T)-Anlage", 
-          value=result.values["Primärenergieverbrauch BIPV(T)"], 
+          value=round(result.values["Primärenergieverbrauch BIPV(T)"], 0),
           suffix="kWh/a")
       )
       return PlotlyAndDataResult(fig_1.to_json(), summary)
@@ -221,14 +223,14 @@ class ExampeType(ViktorController):
           suffix="kg/a"),
         DataItem(
           label= "mit BIPV(T)", 
-          value=result.values["CO2-Äquivalent BIPV(T)"], 
+          value=round(result.values["CO2-Äquivalent BIPV(T)"], 0),
           suffix="kg/a")
       )
 
       return PlotlyAndDataResult(fig_2.to_json(), summary)
     
-    @PlotlyAndDataView('wirtschaftliche Kennzahlen', duration_guess=5) #for step 3
-    def get_plotlyWirt_view(self, params: Munch, **kwargs: dict) -> DataResult:
+    @PlotlyAndDataView('wirtschaftliche Kennzahlen', duration_guess=10) #for step 3
+    def get_plotlyWirt_view(self, params: Munch, **kwargs) -> DataResult:
       input_list = [
         SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
         SpreadsheetCalculationInput("Anzahl WE", params.step_1.WE),
@@ -251,45 +253,42 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Ladesäule", params.step_2.Förder2)
       ]
       
-      excel_file_path = Path(__file__).parent / "break_even_kalk.xlsx"
+      excel_file_path = Path(__file__).parent / "break-even-kalk.xlsx"
       workbook = File.from_path(excel_file_path)
       sheet = SpreadsheetCalculation(workbook, input_list)
       result = sheet.evaluate()
-      return result.values
 
-      _line = {}
-      x_data = (0,1,2,3,4,5,6,7,8,9,10)
-      y_data = (-220, -110, -50, 0, 2, 4, 6, 10, 10, 10, 15)
-      
-        #[y= result.values["kumulierter Barwert_0"],result.values["kumulierter Barwert_1"],result.values["kumulierter Barwert_2"],result.values["kumulierter Barwert_3"],result.values["kumulierter Barwert_4"],result.values["kumulierter Barwert_5"],
-        #result.values["kumulierter Barwert_6"],result.values["kumulierter Barwert_7"],result.values["kumulierter Barwert_8"],result.values["kumulierter Barwert_9"],result.values["kumulierter Barwert_10"],
-        #result.values["kumulierter Barwert_11"],result.values["kumulierter Barwert_12"],result.values["kumulierter Barwert_13"],result.values["kumulierter Barwert_14"],result.values["kumulierter Barwert_15"],
-        #result.values["kumulierter Barwert_16"],result.values["kumulierter Barwert_17"],result.values["kumulierter Barwert_18"],result.values["kumulierter Barwert_19"],result.values["kumulierter Barwert_20"],
-        #result.values["kumulierter Barwert_21"],result.values["kumulierter Barwert_22"],result.values["kumulierter Barwert_23"],result.values["kumulierter Barwert_24"],result.values["kumulierter Barwert_25"],
-        #result.values["kumulierter Barwert_26"],result.values["kumulierter Barwert_27"],result.values["kumulierter Barwert_28"],result.values["kumulierter Barwert_29"],result.values["kumulierter Barwert_30"]]
+      x_data = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+      y_data = [result.values["Barwert_0"], result.values["Barwert_1"], result.values["Barwert_2"], result.values["Barwert_3"], result.values["Barwert_4"], result.values["Barwert_5"],
+        result.values["Barwert_6"],result.values["Barwert_7"],result.values["Barwert_8"],result.values["Barwert_9"],result.values["Barwert_10"],
+        result.values["Barwert_11"],result.values["Barwert_12"],result.values["Barwert_13"],result.values["Barwert_14"],result.values["Barwert_15"],
+        result.values["Barwert_16"],result.values["Barwert_17"],result.values["Barwert_18"],result.values["Barwert_19"],result.values["Barwert_20"],
+        result.values["Barwert_21"],result.values["Barwert_22"],result.values["Barwert_23"],result.values["Barwert_24"],result.values["Barwert_25"],
+        result.values["Barwert_26"],result.values["Barwert_27"],result.values["Barwert_28"],result.values["Barwert_29"],result.values["Barwert_30"]]
 
       fig_3 = {
         "data": [
           {"type": "line",
           "x": x_data, 
-          "y": y_data,
-          "name": "kumulierter Barwert"},
-        ],
+          "y": y_data }],
         "layout": {
-          "title": "line",
+          "title": {"text": f"Amortisationsdauer der BIPV(T)-Anlage"},
           "xaxis": {"title": {"text": "Lebensdauer in Jahren"}},
           "yaxis": {"title": {"text": "Kumulierter Barwert in €"}},
         },
       }
       
-      fig_3["layout"]= [_line]
-      
       summary = DataGroup(
         DataItem(
           label = "Investitionskosten",
-          value = result.values["Investitionskosten"],
+          value = round(result.values["Investitionskosten"],2),
           suffix="€"
         ), 
+        DataItem(
+          label= "Barwert 15",
+          value = result.values["Barwert_1"],
+          suffix="€"
+        ),
         DataItem(
           label = "Amortisationsdauer",
           value = result.values["Break-Even-Point"], 
