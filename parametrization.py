@@ -201,17 +201,20 @@ class Parametrization(ViktorParametrization):
   step_2.Speicher = OptionField(
     "Anlage mit Stromspeicher",
     options=["ja","nein"], 
+    default="nein",
     variant='radio-inline',
     description="Durch einen Stromspeicher kann ein höherer Anteil des produzierten Stroms verwendet werden (vgl. Lastmanagement)",
   )
   step_2.Förder1 = OptionField(
     "Elektroauto im Haushalt",
     options=["ja","nein"],
+    default="nein",
     description="Ist eine im Haushalt lebende Person in Besitz eines Elektroautos? (Hybridfahrzeuge sind nicht eingeschlossen)"
   )
   step_2.Förder2 = OptionField(
     "Ladesäule für Elektromobilität", 
-    options=["ja", "nein, nicht erforderlich"]
+    options=["ja", "nein"],
+    default="nein"
   )
 
   step_3 = Step("Ergebnis",views=["get_plotlyÖko1_view", "get_plotlyÖko2_view", "get_plotlyWirt_view"])

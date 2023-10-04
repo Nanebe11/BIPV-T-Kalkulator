@@ -41,7 +41,7 @@ class ExampeType(ViktorController):
      return ImageResult.from_path(image_path) 
 
     @DataView('Erträge', duration_guess=10) #for step 2
-    def get_Erträge_view(self, params: Munch, **kwargs: dict) -> DataResult:
+    def get_Erträge_view(self, params: Munch, **kwargs) -> DataResult:
       input_list = [
         SpreadsheetCalculationInput("Fläche der PV-Anlage (1)", params.step_2.Area1),
         SpreadsheetCalculationInput("Ausrichtung der Fläche (1)", params.step_2.Azimut1),
@@ -54,10 +54,12 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Fläche der PVT-Anlage (4)", params.step_2.Area4),
         SpreadsheetCalculationInput("Ausrichtung der Fläche (4)", params.step_2.Azimut4),
       ]
+     
       excel_file_path = Path(__file__).parent / "ertraege.xlsx"
-      workbook1 = File.from_path(excel_file_path)
-      sheet = SpreadsheetCalculation(workbook1, input_list)
+      workbook = File.from_path(excel_file_path)
+      sheet = SpreadsheetCalculation(workbook, input_list)
       result = sheet.evaluate()
+
       data_groupe = DataGroup(
         DataItem(
           label="jährlicher Energieertrag BIPV (elektrisch)",
@@ -79,7 +81,7 @@ class ExampeType(ViktorController):
       return DataResult(data_groupe)
 
     @DataView('energiebezogene Kennzahlen', duration_guess=5) #for step 2
-    def get_Energie_view(self, params: Munch, **kwargs: dict)-> DataResult:
+    def get_Energie_view(self, params: Munch, **kwargs)-> DataResult:
       input_list = [
         SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
         SpreadsheetCalculationInput("Anzahl WE", params.step_1.WE),
@@ -140,7 +142,7 @@ class ExampeType(ViktorController):
 
 
     @PlotlyAndDataView("Primärenergieverbrauch", duration_guess=1) #for step 3
-    def get_plotlyÖko1_view(self, params: Munch, **kwargs: dict) -> DataResult:
+    def get_plotlyÖko1_view(self, params: Munch, **kwargs) -> DataResult:
       input_list = [
         SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
         SpreadsheetCalculationInput("Anzahl WE", params.step_1.WE),
@@ -160,8 +162,8 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Stromspeicher", params.step_2.Speicher),
       ]
       excel_file_path = Path(__file__).parent / "oekologische.xlsx"
-      workbook2 = File.from_path(excel_file_path)
-      sheet = SpreadsheetCalculation(workbook2, input_list)
+      workbook = File.from_path(excel_file_path)
+      sheet = SpreadsheetCalculation(workbook, input_list)
       result = sheet.evaluate()
 
       fig_1 = go.Figure(
@@ -171,13 +173,19 @@ class ExampeType(ViktorController):
       )
       
       summary = DataGroup(
-        DataItem("Amount a",value=3),
-        DataItem("Amount b", value=5)
+        DataItem(
+          label= "Vergleichssystem",
+          value=result.values["Primärenergieverbrauch Vgl Ges"], 
+          suffix="kWh/a"),
+        DataItem(
+          label="mit BIPV(T)-Anlage", 
+          value=result.values["Primärenergieverbrauch BIPV(T)"], 
+          suffix="kWh/a")
       )
       return PlotlyAndDataResult(fig_1.to_json(), summary)
 
     @PlotlyAndDataView("CO2-Äquivalent", duration_guess=1) #for step 3
-    def get_plotlyÖko2_view(self, params: Munch, **kwargs: dict) -> DataResult:
+    def get_plotlyÖko2_view(self, params: Munch, **kwargs) -> DataResult:
       input_list = [
         SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
         SpreadsheetCalculationInput("Anzahl WE", params.step_1.WE),
@@ -197,8 +205,8 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Stromspeicher", params.step_2.Speicher),
       ]
       excel_file_path = Path(__file__).parent / "oekologische.xlsx"
-      workbook2 = File.from_path(excel_file_path)
-      sheet = SpreadsheetCalculation(workbook2, input_list)
+      workbook = File.from_path(excel_file_path)
+      sheet = SpreadsheetCalculation(workbook, input_list)
       result = sheet.evaluate()
 
       fig_2 = go.Figure(
@@ -206,11 +214,20 @@ class ExampeType(ViktorController):
         y=[result.values["CO2-Äquivalent Vgl Ges"], result.values["CO2-Äquivalent BIPV(T)"]])],
         layout=go.Layout(title=go.layout.Title(text="CO2-Äquivalent")),
       )
-      summary = DataGroup()
+      summary = DataGroup(
+        DataItem(
+          label="Vergleichssystem",
+          value=result.values["CO2-Äquivalent Vgl Ges"], 
+          suffix="kg/a"),
+        DataItem(
+          label= "mit BIPV(T)", 
+          value=result.values["CO2-Äquivalent BIPV(T)"], 
+          suffix="kg/a")
+      )
 
       return PlotlyAndDataResult(fig_2.to_json(), summary)
     
-    @PlotlyAndDataView('wirtschaftliche Kennzahlen', duration_guess=10) #for step 3
+    @PlotlyAndDataView('wirtschaftliche Kennzahlen', duration_guess=5) #for step 3
     def get_plotlyWirt_view(self, params: Munch, **kwargs: dict) -> DataResult:
       input_list = [
         SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
@@ -233,29 +250,53 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Elektroauto", params.step_2.Förder1),
         SpreadsheetCalculationInput("Ladesäule", params.step_2.Förder2)
       ]
-      excel_file_path = Path(__file__).parent / "wirtschaftlich.xlsx"
-      workbook3 = File.from_path(excel_file_path)
-      sheet = SpreadsheetCalculation(workbook3, input_list)
+      
+      excel_file_path = Path(__file__).parent / "break_even_kalk.xlsx"
+      workbook = File.from_path(excel_file_path)
+      sheet = SpreadsheetCalculation(workbook, input_list)
       result = sheet.evaluate()
+      return result.values
 
-      fig_3 = go.Figure(
-        data= [go.Line(x=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],
-        y=[result.values["kumulierter Barwert_0"],result.values["kumulierter Barwert_1"],result.values["kumulierter Barwert_2"],result.values["kumulierter Barwert_3"],result.values["kumulierter Barwert_4"],result.values["kumulierter Barwert_5"],
-        result.values["kumulierter Barwert_6"],result.values["kumulierter Barwert_7"],result.values["kumulierter Barwert_8"],result.values["kumulierter Barwert_9"],result.values["kumulierter Barwert_10"],
-        result.values["kumulierter Barwert_11"],result.values["kumulierter Barwert_12"],result.values["kumulierter Barwert_13"],result.values["kumulierter Barwert_14"],result.values["kumulierter Barwert_15"],
-        result.values["kumulierter Barwert_16"],result.values["kumulierter Barwert_17"],result.values["kumulierter Barwert_18"],result.values["kumulierter Barwert_19"],result.values["kumulierter Barwert_20"],
-        result.values["kumulierter Barwert_21"],result.values["kumulierter Barwert_22"],result.values["kumulierter Barwert_23"],result.values["kumulierter Barwert_24"],result.values["kumulierter Barwert_25"],
-        result.values["kumulierter Barwert_26"],result.values["kumulierter Barwert_27"],result.values["kumulierter Barwert_28"],result.values["kumulierter Barwert_29"],result.values["kumulierter Barwert_30"]])],
-      )
+      _line = {}
+      x_data = (0,1,2,3,4,5,6,7,8,9,10)
+      y_data = (-220, -110, -50, 0, 2, 4, 6, 10, 10, 10, 15)
+      
+        #[y= result.values["kumulierter Barwert_0"],result.values["kumulierter Barwert_1"],result.values["kumulierter Barwert_2"],result.values["kumulierter Barwert_3"],result.values["kumulierter Barwert_4"],result.values["kumulierter Barwert_5"],
+        #result.values["kumulierter Barwert_6"],result.values["kumulierter Barwert_7"],result.values["kumulierter Barwert_8"],result.values["kumulierter Barwert_9"],result.values["kumulierter Barwert_10"],
+        #result.values["kumulierter Barwert_11"],result.values["kumulierter Barwert_12"],result.values["kumulierter Barwert_13"],result.values["kumulierter Barwert_14"],result.values["kumulierter Barwert_15"],
+        #result.values["kumulierter Barwert_16"],result.values["kumulierter Barwert_17"],result.values["kumulierter Barwert_18"],result.values["kumulierter Barwert_19"],result.values["kumulierter Barwert_20"],
+        #result.values["kumulierter Barwert_21"],result.values["kumulierter Barwert_22"],result.values["kumulierter Barwert_23"],result.values["kumulierter Barwert_24"],result.values["kumulierter Barwert_25"],
+        #result.values["kumulierter Barwert_26"],result.values["kumulierter Barwert_27"],result.values["kumulierter Barwert_28"],result.values["kumulierter Barwert_29"],result.values["kumulierter Barwert_30"]]
 
+      fig_3 = {
+        "data": [
+          {"type": "line",
+          "x": x_data, 
+          "y": y_data,
+          "name": "kumulierter Barwert"},
+        ],
+        "layout": {
+          "title": "line",
+          "xaxis": {"title": {"text": "Lebensdauer in Jahren"}},
+          "yaxis": {"title": {"text": "Kumulierter Barwert in €"}},
+        },
+      }
+      
+      fig_3["layout"]= [_line]
+      
       summary = DataGroup(
         DataItem(
           label = "Investitionskosten",
-          value = 100,
+          value = result.values["Investitionskosten"],
           suffix="€"
+        ), 
+        DataItem(
+          label = "Amortisationsdauer",
+          value = result.values["Break-Even-Point"], 
+          suffix="Jahre"
         )
       )
 
-      return PlotlyAndDataResult(fig_3.to_json(), summary)
+      return PlotlyAndDataResult(fig_3, summary)
 
 
