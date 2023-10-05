@@ -23,6 +23,8 @@ from viktor.views import (
   PlotlyAndDataResult,
   ImageView, 
   ImageResult,
+  WebView, 
+  WebResult,
 )
 
 from parametrization import Parametrization
@@ -34,7 +36,7 @@ class ExampeType(ViktorController):
 
     @ImageView('', duration_guess=1) #for step 1
     def get_image_view(self, params, **kwargs):
-     image_path = Path(__file__).parent / 'try_first.jpg'
+     image_path = Path(__file__).parent / 'ubersicht.jpg'
      return ImageResult.from_path(image_path)
 
     @ImageView('Anlagentypen', duration_guess=1) #for step 2
@@ -253,49 +255,95 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Ladesäule", params.step_2.Förder2)
       ]
       
-      excel_file_path = Path(__file__).parent / "break-even-kalk.xlsx"
+      excel_file_path = Path(__file__).parent / "wirtschaftlich.xlsx"
       workbook = File.from_path(excel_file_path)
       sheet = SpreadsheetCalculation(workbook, input_list)
-      result = sheet.evaluate()
+      result = sheet.evaluate(include_filled_file=True)
 
-      x_data = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
-      y_data = [result.values["Barwert_0"], result.values["Barwert_1"], result.values["Barwert_2"], result.values["Barwert_3"], result.values["Barwert_4"], result.values["Barwert_5"],
-        result.values["Barwert_6"],result.values["Barwert_7"],result.values["Barwert_8"],result.values["Barwert_9"],result.values["Barwert_10"],
-        result.values["Barwert_11"],result.values["Barwert_12"],result.values["Barwert_13"],result.values["Barwert_14"],result.values["Barwert_15"],
-        result.values["Barwert_16"],result.values["Barwert_17"],result.values["Barwert_18"],result.values["Barwert_19"],result.values["Barwert_20"],
-        result.values["Barwert_21"],result.values["Barwert_22"],result.values["Barwert_23"],result.values["Barwert_24"],result.values["Barwert_25"],
-        result.values["Barwert_26"],result.values["Barwert_27"],result.values["Barwert_28"],result.values["Barwert_29"],result.values["Barwert_30"]]
+      sheet2 = SpreadsheetCalculation(File.from_path(Path(__file__).parent / 'energie_bedarf.xlsx'), input_list)
+      result = sheet2.evaluate()
+
+      FlächeGes = params.step_2.Area1 + params.step_2.Area2 + params.step_2.Area3 + params.step_2.Area4
+
+      A3=100+200
+      A4=100+ FlächeGes*2
+      A5=100
+      A6=100+ FlächeGes*2 +200
+      A7=100
+      A8=100+ FlächeGes*2
+      A9=100+200
+      A10=100+ FlächeGes*2
+      A11=100
+      A12=100+ FlächeGes*2+200
+      A13=100 + result.values["Inv_Wechselrichter"]
+      A14=100+ FlächeGes*2 
+      A15=100 +200
+      A16=100+ FlächeGes*2
+      A17=100
+      A18=100+ FlächeGes*2+200
+      A19=100
+      A20=100+ FlächeGes*2
+
+      if params.step_1.Wä == "Heizöl": 
+        E1= result.values["Einspeisevergütung_1-20"] * result.values["jährlich_einspeis_elektrisch"] + result.values["jährlich_nutzbar_elektrisch"] * 0.3496 + result.values["jährlich_nutzbar_thermisch"] * 0.09833
+      else: E1= result.values["Einspeisevergütung_1-20"] * result.values["jährlich_einspeis_elektrisch"] + result.values["jährlich_nutzbar_elektrisch"] * 0.3496 + result.values["jährlich_nutzbar_thermisch"] * 0.0934
+
+      R0 = 0-result.values["Investitionskosten"]
+      R1 = (E1 - result.values["Investitionskosten"])/(1.05^1)
+      R2 = (E1 * (100-0.4*(2-1))/100 -100)/(1.05^2)
+      R3 = (E1 * (100-0.4*(3-1))/100 -100 + FlächeGes * 2)/(1.05^3)
+      R4 = (E1 * (100-0.4*(4-1))/100 -A4)/(1.05^4)
+      R5 = (E1 * (100-0.4*(5-1))/100 -A5)/(1.05^5)
+      R6 = (E1 * (100-0.4*(6-1))/100 -A6)/(1.05^6)
+      R7 = (E1 * (100-0.4*(7-1))/100 -A7)/(1.05^7)
+      R8 = (E1 * (100-0.4*(8-1))/100 -A8)/(1.05^8)
+      R9 = (E1 * (100-0.4*(9-1))/100 -A9)/(1.05^9)
+      R10 = (E1 * (100-0.4*(10-1))/100 -A10)/(1.05^10)
+      R11 = (E1 * (100-0.4*(11-1))/100 -A11)/(1.05^11)
+      R12 = (E1 * (100-0.4*(12-1))/100 -A12)/(1.05^12)
+      R13 = (E1 * (100-0.4*(13-1))/100 -A13)/(1.05^13)
+      R14 = (E1 * (100-0.4*(14-1))/100 -A14)/(1.05^14)
+      R15 = (E1 * (100-0.4*(15-1))/100 -A15)/(1.05^15)
+      R16 = (E1 * (100-0.4*(16-1))/100 -A16)/(1.05^16)
+      R17 = (E1 * (100-0.4*(17-1))/100 -A17)/(1.05^17)
+      R18 = (E1 * (100-0.4*(18-1))/100 -A18)/(1.05^18)
+      R19 = (E1 * (100-0.4*(19-1))/100 -A19)/(1.05^19)
+      R20 = (E1 * (100-0.4*(20-1))/100 -A20)/(1.05^20)
+
+      
+      
+
+      x_data = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+      y_data = [R0, R0+R1,R0+R1+R2, R0+R1+R2+R3, R0+R1+R2+R3+R4, R0+R1+R2+R3+R4+R5, R0+R1+R2+R3+R4+R5+R6, R0+R1+R2+R3+R4+R5+R6+R7,
+        R0+R1+R2+R3+R4+R5+R6+R7+R8, R0+R1+R2+R3+R4+R5+R6+R7+R8+R9]
 
       fig_3 = {
-        "data": [
-          {"type": "line",
+       "data": [
+         {"type": "line",
           "x": x_data, 
           "y": y_data }],
-        "layout": {
+       "layout": {
           "title": {"text": f"Amortisationsdauer der BIPV(T)-Anlage"},
           "xaxis": {"title": {"text": "Lebensdauer in Jahren"}},
           "yaxis": {"title": {"text": "Kumulierter Barwert in €"}},
         },
       }
       
+
       summary = DataGroup(
         DataItem(
           label = "Investitionskosten",
           value = round(result.values["Investitionskosten"],2),
           suffix="€"
-        ), 
-        DataItem(
-          label= "Barwert 15",
-          value = result.values["Barwert_1"],
-          suffix="€"
-        ),
-        DataItem(
-          label = "Amortisationsdauer",
-          value = result.values["Break-Even-Point"], 
-          suffix="Jahre"
         )
-      )
+        )
+      return PlotlyAndDataResult(fig_3,summary)
 
-      return PlotlyAndDataResult(fig_3, summary)
 
+    @WebView("What's next?", duration_guess=1)
+    def whats_next(self, **kwargs):
+      html_path = Path(__file__).parent / "final_step_text.html"
+      with html_path.open() as f:
+        html_string = f.read()
+      return WebResult(html=html_string)   
 

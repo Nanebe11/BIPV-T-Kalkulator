@@ -20,8 +20,7 @@ class Parametrization(ViktorParametrization):
   Es soll dabei helfen eine erste Einschätzung zu erhalten, ob eine Investition
   in eine solche Anlage für einen bestimmten Anwendungsfall sinnvoll ist.
 
-  Auf der rechten Seite können Sie eine generelle Übersicht 
-  über die betrachteten Zahlungs- und Energieflüsse bei BIPV(T)-Anlagen sehen.
+  Auf der rechten Seite können Sie zwei Beispiele für bereits durchgeführte BIPV-Anlagen sehen.
 
   Diese App wurde im Rahmen der Masterarbeit: 
   "Wirtschaftlichkeitsanalyse von BIPV(T)-Anlagen unter Berücksichtigung der Kosten und Nutzen" entwickelt. 
@@ -262,7 +261,9 @@ class Parametrization(ViktorParametrization):
   Bei den laufenden Kosten wurden darüber hinaus die Einsparungen aus nicht erforderlichen Energien aus dem Netz berücksichtigt.  
   """
   )
-  step_3.text5 = Text("""
+  step_4 = Step("What's next",views=["whats_next"])
+  
+  step_4.text5 = Text("""
   ## Vielen Dank
   für Ihr Interesse an BIPV(T)-Anlagen 
   und ich wünsche Ihnen viel Erfolg bei der Konfiguration der richtigen Anlage für Ihren speziellen Nutzen. 
