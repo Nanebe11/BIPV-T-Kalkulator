@@ -99,6 +99,8 @@ class Parametrization(ViktorParametrization):
 
   Im folgenden müssen Sie einige Informationen zu der geplanten BIPV(T)-Anlage treffen. 
   Auf der rechten Seite werden die solaren Erträge und die energiebezogenen Kennzahlen für die konfigurierte Anlage ausgegeben. 
+
+  Die Berechnung der Ergebnisse kann im Allgemeinen einen kleinen Moment dauern, ich bitte Sie daher kurz Geduld zu haben.
     
   Dabei wird für den Solarertrag vereinfacht eine Einstrahlung von 1.000 kWh je kWpeak für ganz Deutschland angenommen. 
   Die Ausrichtung und Neigung der Fläche wird gemäß der Angaben berücksichtigt. 
@@ -239,7 +241,7 @@ class Parametrization(ViktorParametrization):
   step_3.text4 = Text (
     """# Ergebnisse
   In diesem Schritt werden die Ergebnisse aus allen zuvor getätigen Angaben berechnet. 
-  Durch die auf der rechten Seite dargestellten Kennzahlen soll Ihnen die Entscheidung für oder gegen die eingestellte Anlage auf Basis wissenschaftlicher Kennzahlen erleichtert werden.
+  Durch die auf der rechten Seite dargestellten Kennzahlen soll Ihnen die Entscheidung für oder gegen die eingestellte Anlage auf Basis wissenschaftlicher Kennzahlen erleichtert werden. 
 
   Es ist jederzeit möglich über 'Previous step' zurück zur Anlagenkonfiguration zu gelangen und die Eingangswerte zu ändern. 
   Dadurch können Sie verschiedene für Sie mögliche Konfigurationen vergleichen. 
