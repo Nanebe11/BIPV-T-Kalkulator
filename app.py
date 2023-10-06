@@ -285,12 +285,13 @@ class ExampeType(ViktorController):
       summary = DataGroup(
         DataItem(
           label = "Investitionskosten",
-          value = result.values["Barwert_0"],
+          value = result.values["Investitionskosten"],
           suffix="€"
         ),
         DataItem(
           label="Amortisationsdauer",
-          value=result.values["Break-Even-Point"]
+          value=result.values["Break-Even-Point"],
+          suffix="Jahre"
         )
         )
       return PlotlyAndDataResult(fig_3,summary)

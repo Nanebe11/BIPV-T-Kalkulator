@@ -70,13 +70,6 @@ class Parametrization(ViktorParametrization):
     description="Zusammengerechnete beheizte Wohnfläche aller Wohneinheiten"
   )
 
-  #step_1.Energiebedarf = NumberField(
-  #  "Jahresenergiebedarf",
-  #  suffix="kWh",
-  #  default=0,
-  #  description="Nur eintragen, wenn dieser bekannt ist. Kann beispielsweise aus dem Energieausweis abgelesen werden"
-  #)
-
   step_1.text2 = Text("""
   Bitte geben Sie im folgenden die Art der aktuellen Wärmeerzeugung an. 
   Sollten Sie keine aktuelle Wärmererzeugung haben (Neubauten), können Sie eine alternative als Vergleichswert wählen.
