@@ -234,35 +234,40 @@ class ExampeType(ViktorController):
     @PlotlyAndDataView('wirtschaftliche Kennzahlen', duration_guess=10) #for step 3
     def get_plotlyWirt_view(self, params: Munch, **kwargs) -> DataResult:
       input_list = [
-        SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
-        SpreadsheetCalculationInput("Anzahl WE", params.step_1.WE),
-        SpreadsheetCalculationInput("Anzahl Personen", params.step_1.Pers),
+        SpreadsheetCalculationInput("GA", params.step_1.GA),
+        SpreadsheetCalculationInput("WE", params.step_1.WE),
+        SpreadsheetCalculationInput("Personen", params.step_1.Pers),
         SpreadsheetCalculationInput("Wohnfläche", params.step_1.Wf),
         SpreadsheetCalculationInput("aktuelle Wärmeerzeugung", params.step_1.Wä),
-        SpreadsheetCalculationInput("Fläche der PV-Anlage (1)", params.step_2.Area1),
-        SpreadsheetCalculationInput("Ausrichtung der Fläche (1)", params.step_2.Azimut1),
-        SpreadsheetCalculationInput("Neigung der Fläche (1)", params.step_2.Neigung1),
-        SpreadsheetCalculationInput("Fläche der PVT-Anlage (2)", params.step_2.Area2),
-        SpreadsheetCalculationInput("Ausrichtung der Fläche (2)", params.step_2.Azimut2),
-        SpreadsheetCalculationInput("Neigung der Fläche (2)", params.step_2.Neigung2),
-        SpreadsheetCalculationInput("Fläche der PV-Anlage (3)", params.step_2.Area3),
-        SpreadsheetCalculationInput("Ausrichtung der Fläche (3)", params.step_2.Azimut3),
-        SpreadsheetCalculationInput("Fläche der PVT-Anlage (4)", params.step_2.Area4),
-        SpreadsheetCalculationInput("Ausrichtung der Fläche (4)", params.step_2.Azimut4),
+        SpreadsheetCalculationInput("Fläche1", params.step_2.Area1),
+        SpreadsheetCalculationInput("Ausrichtung1", params.step_2.Azimut1),
+        SpreadsheetCalculationInput("Neigung1", params.step_2.Neigung1),
+        SpreadsheetCalculationInput("Fläche2", params.step_2.Area2),
+        SpreadsheetCalculationInput("Ausrichtung2", params.step_2.Azimut2),
+        SpreadsheetCalculationInput("Neigung2", params.step_2.Neigung2),
+        SpreadsheetCalculationInput("Fläche3", params.step_2.Area3),
+        SpreadsheetCalculationInput("Ausrichtung3", params.step_2.Azimut3),
+        SpreadsheetCalculationInput("Fläche4", params.step_2.Area4),
+        SpreadsheetCalculationInput("Ausrichtung4", params.step_2.Azimut4),
         SpreadsheetCalculationInput("Stromspeicher", params.step_2.Speicher),
-        SpreadsheetCalculationInput("Inbetriebnahme-Zeitpunkt", params.step_2.Inbetrieb),
+        SpreadsheetCalculationInput("Inbetrieb", params.step_2.Inbetrieb),
         SpreadsheetCalculationInput("Elektroauto", params.step_2.Förder1),
         SpreadsheetCalculationInput("Ladesäule", params.step_2.Förder2)
       ]
       
-      excel_file_path = Path(__file__).parent / "break_even.xlsx"
+      excel_file_path = Path(__file__).parent / "break_even2.xlsx"
       workbook = File.from_path(excel_file_path)
       sheet = SpreadsheetCalculation(workbook, input_list)
-      result = sheet.evaluate(include_filled_file=True)
+      result = sheet.evaluate()
       print(result.values)
 
-      x_data = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
-      y_data = []
+      x_data = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+      y_data = [result.values["Barwert_0"],result.values["Barwert_1"],result.values["Barwert_2"],result.values["Barwert_3"],result.values["Barwert_4"],result.values["Barwert_5"],
+      result.values["Barwert_6"],result.values["Barwert_7"],result.values["Barwert_8"],result.values["Barwert_9"],result.values["Barwert_10"],
+      result.values["Barwert_11"], result.values["Barwert_12"], result.values["Barwert_13"],result.values["Barwert_14"],result.values["Barwert_15"],
+      result.values["Barwert_16"],result.values["Barwert_17"],result.values["Barwert_18"],result.values["Barwert_19"],result.values["Barwert_20"],
+      result.values["Barwert_21"],result.values["Barwert_22"],result.values["Barwert_23"],result.values["Barwert_24"],result.values["Barwert_25"],
+      result.values["Barwert_26"],result.values["Barwert_27"],result.values["Barwert_28"],result.values["Barwert_29"],result.values["Barwert_30"],]
 
       fig_3 = {
        "data": [
@@ -284,12 +289,8 @@ class ExampeType(ViktorController):
           suffix="€"
         ),
         DataItem(
-          label="E1",
-          value=result.values["Barwert_1"]
-        ),
-        DataItem(
-          label="E5",
-          value=result.values["Barwert_5"]
+          label="Amortisationsdauer",
+          value=result.values["Break-Even-Point"]
         )
         )
       return PlotlyAndDataResult(fig_3,summary)

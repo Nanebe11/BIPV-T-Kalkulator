@@ -37,7 +37,7 @@ class Parametrization(ViktorParametrization):
 
   step_1.GA = OptionField(
     "Gebäudeart", 
-    options=['Neubau', 'Sanierung', 'Bestandsgebäude'], 
+    options=['Neubau', 'Sanierung', 'Bestand'], 
     default="Neubau",
     variant='radio-inline'
   ) 
