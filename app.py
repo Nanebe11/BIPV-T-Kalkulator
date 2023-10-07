@@ -34,12 +34,12 @@ class ExampeType(ViktorController):
     label = "Example Type"
     parametrization = Parametrization (width=40)
 
-    @ImageView('', duration_guess=1) #for step 1
+    @ImageView('',duration_guess=1) #for step 1
     def get_image_view(self, params, **kwargs):
      image_path = Path(__file__).parent / 'ubersicht.jpg'
      return ImageResult.from_path(image_path)
 
-    @ImageView('Anlagentypen', duration_guess=1) #for step 2
+    @ImageView('Übersicht', duration_guess=1) #for step 2
     def get_image2_view(self, params, **kwargs):
      image_path = Path(__file__).parent / 'Darstellung.jpg'
      return ImageResult.from_path(image_path) 

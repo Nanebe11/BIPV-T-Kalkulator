@@ -1,4 +1,4 @@
-#!/workspace/demoapp/venv/bin/python3
+#!/workspace/BIPV-T-Kalkulator/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

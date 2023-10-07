@@ -213,7 +213,7 @@ class Parametrization(ViktorParametrization):
     options=["ja","nein"], 
     default="nein",
     variant='radio-inline',
-    description="Durch einen Stromspeicher kann ein höherer Anteil des produzierten Stroms verwendet werden (vgl. Lastmanagement)",
+    description="Soll ein Stromspeicher für Ihre Anlage eingeplant werde? Durch einen Stromspeicher kann ein höherer Anteil des produzierten Stroms verwendet werden (vgl. Lastmanagement)",
   )
   step_2.textc = Text(" ")
 
@@ -221,12 +221,13 @@ class Parametrization(ViktorParametrization):
     "Elektroauto im Haushalt",
     options=["ja","nein"],
     default="nein",
-    description="Ist eine im Haushalt lebende Person in Besitz eines Elektroautos? (Hybridfahrzeuge sind nicht eingeschlossen)"
+    description="Ist eine im Haushalt lebende Person in Besitz eines Elektroautos? (Hybridfahrzeuge und Leasing sind nicht eingeschlossen)"
   )
   step_2.Förder2 = OptionField(
     "Ladesäule für Elektromobilität", 
     options=["ja", "nein"],
-    default="nein"
+    default="nein",
+    description="Wollen Sie eine Ladesäule für Elektromobilität bauen und bei der Wirtschaftlichkeitsberechnung berücksichtigen?"
   )
 
   step_3 = Step("Ergebnisse",views=["get_plotlyÖko1_view", "get_plotlyÖko2_view", "get_plotlyWirt_view"])
@@ -256,7 +257,7 @@ class Parametrization(ViktorParametrization):
   Bei den laufenden Kosten wurden darüber hinaus die Einsparungen aus nicht erforderlichen Energien aus dem Netz berücksichtigt.  
   """
   )
-  step_4 = Step("What's next",views=["whats_next"])
+  step_4 = Step("Abschluss",views=["whats_next"])
   
   step_4.text5 = Text("""
   ## Vielen Dank
