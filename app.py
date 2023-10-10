@@ -65,26 +65,28 @@ class ExampeType(ViktorController):
       result = sheet.evaluate()
 
       data_groupe = DataGroup(
-        DataItem(
+        group_d =DataItem(
           label="jährlicher Energieertrag BIPV (elektrisch)",
           value=round(result.values["jährlicher Energieertrag BIPV (elektrisch)"], 0),
           suffix ="kWh/a"),
-        DataItem(
+        group_a=DataItem(
           label="jährlicher Energieertrag BIPVT",
           value=round(result.values["jährlicher Energieertrag BIPVT"],0),
-          suffix="kWh/a"),
-        DataItem(
-          label="Anteil elektrischer Energie (BIPVT)",
-         value=round(result.values["Anteil elektrische Energie an BIPVT"],0),
-          suffix="kWh/a"),
-        DataItem(
-          label="Anteil thermischer Energie (BIPVT)",
-          value=round(result.values["Anteil thermische Energie an BIPVT"],0),
-          suffix="kWh/a")
+          suffix="kWh/a", 
+          subgroup = DataGroup(
+            DataItem(
+            label="Anteil elektrischer Energie (BIPVT)",
+            value=round(result.values["Anteil elektrische Energie an BIPVT"],0),
+            suffix="kWh/a"),
+            DataItem(
+            label="Anteil thermischer Energie (BIPVT)",
+            value=round(result.values["Anteil thermische Energie an BIPVT"],0),
+            suffix="kWh/a"))
         )
+      )
       return DataResult(data_groupe)
 
-    @DataView('energiebezogene Kennzahlen', duration_guess=5) #for step 2
+    @DataView('Energiebezogene Kennzahlen', duration_guess=5) #for step 2
     def get_Energie_view(self, params: Munch, **kwargs)-> DataResult:
       input_list = [
         SpreadsheetCalculationInput("Gebäudeart", params.step_1.GA),
@@ -103,45 +105,43 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Fläche der PVT-Anlage (4)", params.step_2.Area4),
         SpreadsheetCalculationInput("Ausrichtung der Fläche (4)", params.step_2.Azimut4),
         SpreadsheetCalculationInput("Stromspeicher", params.step_2.Speicher),
+        SpreadsheetCalculationInput("JEB_Wärme", params.step_1.jebw),
+        SpreadsheetCalculationInput("JEB_Strom", params.step_1.jebs)
       ]
       excel_file_path = Path(__file__).parent / "energie_bedarf.xlsx"
       workbook = File.from_path(excel_file_path)
       sheet = SpreadsheetCalculation(workbook, input_list)
       result = sheet.evaluate()
+
       data_group = DataGroup(
-        DataItem(
-          label="Jahresenergiebedarf Wärme",
-          explanation_label="",
-          value=round(result.values["Jahresenergiebedarf_Wärme"],0),
-          suffix="kWh/a"),
-        DataItem(
-          label="Jahresenergiebedarf TWW",
-          explanation_label="",
-          value=round(result.values["Jahresenergiebedarf_TWW"],0),
-          suffix="kWh/a"),
-        DataItem(
-          label="Jahresenergiebedarf Strom",
-          explanation_label="",
-          value=round(result.values["Jahresenergiebedarf_Strom"],0),
-          suffix="kWh/a"),
-        DataItem(
+        group_b=DataItem(
           label="Jahresenergiebedarf Gesamt",
-          explanation_label="",
           value=round(result.values["Jahresenergiebedarf_Gesamt"],0),
-          suffix="kWh/a"),
-        DataItem(
+          suffix="kWh/a",
+          subgroup = DataGroup(
+            DataItem(
+              label="Jahresenergiebedarf Wärme und TWW",
+              value=round(result.values["Jahresenergiebedarf_WärmeTWW"],0),
+              suffix="kWh/a"),
+            DataItem(
+              label="Jahresenergiebedarf Strom",
+              value=round(result.values["Jahresenergiebedarf_Strom"],0),
+              suffix="kWh/a"))
+        ),
+        group_c=DataItem(
           label="Jährlich nutzbare Strommenge aus BIPV(T)",
           value=round(result.values["jährlich_nutzbar_elektrisch"],0),
           suffix="kWh/a"),
-        DataItem(
+        group_e=DataItem(
           label="Jährlich eingespeiste Strommenge aus BIPV(T)",
           value=round(result.values["jährlich_einspeis_elektrisch"],0),
           suffix="kWh/a"),
-        DataItem(
+        group_f=DataItem(
           label="Jährlich nutzbare Wärmemenge aus BIPVT",
           value=round(result.values["jährlich_nutzbar_thermisch"],0),
           suffix="kWh/a"),
-        )
+      )
+
       return DataResult(data_group)
 
 
@@ -164,6 +164,8 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Fläche der PVT-Anlage (4)", params.step_2.Area4),
         SpreadsheetCalculationInput("Ausrichtung der Fläche (4)", params.step_2.Azimut4),
         SpreadsheetCalculationInput("Stromspeicher", params.step_2.Speicher),
+        SpreadsheetCalculationInput("JEB_Wärme", params.step_1.jebw),
+        SpreadsheetCalculationInput("JEB_Strom", params.step_1.jebs)
       ]
       excel_file_path = Path(__file__).parent / "oekologische.xlsx"
       workbook = File.from_path(excel_file_path)
@@ -173,7 +175,7 @@ class ExampeType(ViktorController):
       fig_1 = go.Figure(
         data=[go.Bar(x=["ohne BIPV(T)","mit BIPV(T)"], 
         y=[result.values["Primärenergieverbrauch Vgl Ges"],result.values["Primärenergieverbrauch BIPV(T)"]])], 
-        layout=go.Layout(title=go.layout.Title(text="Primärenergieverbrauch")),
+        layout=go.Layout(title=go.layout.Title(text="Primärenergieverbrauch in kWh pro Jahr")),
       )
       
       summary = DataGroup(
@@ -207,6 +209,8 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Fläche der PVT-Anlage (4)", params.step_2.Area4),
         SpreadsheetCalculationInput("Ausrichtung der Fläche (4)", params.step_2.Azimut4),
         SpreadsheetCalculationInput("Stromspeicher", params.step_2.Speicher),
+        SpreadsheetCalculationInput("JEB_Wärme", params.step_1.jebw),
+        SpreadsheetCalculationInput("JEB_Strom", params.step_1.jebs)
       ]
       excel_file_path = Path(__file__).parent / "oekologische.xlsx"
       workbook = File.from_path(excel_file_path)
@@ -216,7 +220,7 @@ class ExampeType(ViktorController):
       fig_2 = go.Figure(
         data=[go.Bar(x=["ohne BIPV(T)", "mit BIPV(T)"],
         y=[result.values["CO2-Äquivalent Vgl Ges"], result.values["CO2-Äquivalent BIPV(T)"]])],
-        layout=go.Layout(title=go.layout.Title(text="CO2-Äquivalent")),
+        layout=go.Layout(title=go.layout.Title(text="CO2-Äquivalent in kg pro Jar")),
       )
       summary = DataGroup(
         DataItem(
@@ -231,7 +235,7 @@ class ExampeType(ViktorController):
 
       return PlotlyAndDataResult(fig_2.to_json(), summary)
     
-    @PlotlyAndDataView('wirtschaftliche Kennzahlen', duration_guess=10) #for step 3
+    @PlotlyAndDataView('Wirtschaftliche Kennzahlen', duration_guess=10) #for step 3
     def get_plotlyWirt_view(self, params: Munch, **kwargs) -> DataResult:
       input_list = [
         SpreadsheetCalculationInput("GA", params.step_1.GA),
@@ -251,8 +255,8 @@ class ExampeType(ViktorController):
         SpreadsheetCalculationInput("Ausrichtung4", params.step_2.Azimut4),
         SpreadsheetCalculationInput("Stromspeicher", params.step_2.Speicher),
         SpreadsheetCalculationInput("Inbetrieb", params.step_2.Inbetrieb),
-        SpreadsheetCalculationInput("Elektroauto", params.step_2.Förder1),
-        SpreadsheetCalculationInput("Ladesäule", params.step_2.Förder2)
+        SpreadsheetCalculationInput("JEB_Wärme", params.step_1.jebw),
+        SpreadsheetCalculationInput("JEB_Strom", params.step_1.jebs)
       ]
       
       excel_file_path = Path(__file__).parent / "break_even2.xlsx"

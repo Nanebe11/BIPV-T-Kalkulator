@@ -4,8 +4,7 @@ from viktor.parametrization import (
     IntegerField,
     OptionField,
     Text,
-    Step,
-    Lookup,
+    Step
 )
 
 class Parametrization(ViktorParametrization):
@@ -24,14 +23,14 @@ class Parametrization(ViktorParametrization):
 
   Diese App wurde im Rahmen der Masterarbeit: 
   "Wirtschaftlichkeitsanalyse von BIPV(T)-Anlagen unter Berücksichtigung der Kosten und Nutzen" entwickelt. 
-  Alle verwendetetn Abschätzungen und Eingrenzungen sind im schriftlichen Teil
+  Alle verwendeten Abschätzungen und Eingrenzungen sind im schriftlichen Teil
   dieser Arbeit ausführlich aufgeführt.
 
   ## Generelle Informationen
 
   Die Daten, die Sie im ersten Schritt angeben, 
-  sind generelle Informationen zu dem betrachteten Gebäude. 
-  Dabei finden Sie weitere Informationen zu den einzelnen Eingaben auf dem i. 
+  sind generelle Informationen des zu betrachtenden Gebäudes. 
+  Weiterführende Informationen zu den einzelnen Eingaben sind unter dem Infobutton zu finden. 
     """
   )
 
@@ -69,12 +68,31 @@ class Parametrization(ViktorParametrization):
     min=5,
     description="Zusammengerechnete beheizte Wohnfläche aller Wohneinheiten"
   )
+  step_1.textx = Text("""
+  Sollten Ihnen die genauen Jahresbedarfswerte für Wärme und Trinkwarmwasser, 
+  sowie für Strom bekannt sein, können Sie diese hier eintragen. 
+  Ansonsten belassen Sie die Eintragung "0" und die Jahresbedarfswerte werden 
+  über Durchschnittswerte aus den vorherigen Eingaben berechnet.
+  """)
+
+  step_1.jebw = NumberField(
+    "Jahresenergiebedarf Wärme und Trinkwarmwasser", 
+    suffix="kWh", 
+    default=0
+  )  
+  step_1.jebs = NumberField(
+    "Jahresenergiebedarf Strom", 
+    suffix="kWh", 
+    default=0
+  )
 
   step_1.text2 = Text("""
   Bitte geben Sie im folgenden die Art der aktuellen Wärmeerzeugung an. 
-  Sollten Sie keine aktuelle Wärmererzeugung haben (Neubauten), können Sie eine alternative als Vergleichswert wählen.
+  Sollten Sie keine aktuelle Wärmererzeugung (Neubauten) haben, können Sie eine alternative als Vergleichswert wählen.
   Diese Information wird berücksichtigt, um die ökologischen Kennzahlen zu berechnen. 
   Dabei werden die Auswirkungen eines Gebäudes mit BIPV(T)-Anlage mit denen eines Vergleichsgebäudes verglichen.
+  Im Rahmen dieser Berechnung sind nur Erdgas und Heizöl berücksichtigt, 
+  sollte Ihr Gebäude über eine andere Wärmeerzeugung verfügen, können Sie hier einen Vergleichwert frei wählen. 
   """)
 
   step_1.Wä = OptionField(
@@ -82,7 +100,7 @@ class Parametrization(ViktorParametrization):
     options=["Erdgas", "Heizöl"],
     default="Erdgas",
     variant='radio-inline',
-    description="Bei Neubauten bitte alternative Wärmeerzeugung wählen (Vergleichswert)",
+    description="Bei Neubauten bitte Alternative zur Wärmeerzeugung wählen (Vergleichswert)",
   )
   
   step_2 = Step("Anlagenkonfiguration", views=["get_image2_view","get_Erträge_view", "get_Energie_view"])
@@ -90,10 +108,10 @@ class Parametrization(ViktorParametrization):
   step_2.text3 = Text (
     """# Anlagenkonfiguration
 
-  Im folgenden müssen Sie einige Informationen zu der geplanten BIPV(T)-Anlage treffen. 
+  Im Folgenden müssen Sie einige Informationen zu der geplanten BIPV(T)-Anlage treffen. 
   Auf der rechten Seite werden die solaren Erträge und die energiebezogenen Kennzahlen für die konfigurierte Anlage ausgegeben. 
 
-  Die Berechnung der Ergebnisse kann im Allgemeinen einen kleinen Moment dauern, ich bitte Sie daher kurz Geduld zu haben.
+  Die Berechnung der Ergebnisse kann im Allgemeinen einen kleinen Moment dauern.
     
   Dabei wird für den Solarertrag vereinfacht eine Einstrahlung von 1.000 kWh je kWpeak für ganz Deutschland angenommen. 
   Die Ausrichtung und Neigung der Fläche wird gemäß der Angaben berücksichtigt. 
@@ -102,15 +120,14 @@ class Parametrization(ViktorParametrization):
   )
   
   step_2.textA1 = Text ("""## BIPV-Anlage Dachintegriert
-
   Diese Anlage wird in die Dachfläche eines Gebäudes integriert, 
-  die Photovoltaikmodule erzeugen dabei elektrische Energie der im Gebäude genutzt werden oder eingespeist werden kann.
+  die Photovoltaikmodule erzeugen dabei elektrische Energie, die im Gebäude genutzt oder eingespeist werden kann.
     """
   )
 
   step_2.Area1 = NumberField(
     "Fläche der PV-Anlage", 
-    suffix="m2", 
+    suffix="m^2", 
     default=0,
     min=0,
     max=500,
@@ -131,14 +148,14 @@ class Parametrization(ViktorParametrization):
 
   step_2.textA2 = Text ("""## BIPVT-Anlage Dachintegriert
   Diese Anlage wird ebenfalls in die Dachfläche eines Gebäudes integriert, 
-  die Photovoltaikmodule erzeugen dabei elektrische Energie der im Gebäude genutzt werden oder eingespeist werden kann.
+  die Photovoltaikmodule erzeugen dabei elektrische Energie, die im Gebäude genutzt oder eingespeist werden kann.
   Zusätzlich wird über darunter liegende Kollektoren thermische Energie erzeugt.
     """
   )
 
   step_2.Area2 = NumberField(
     "Fläche der PVT-Anlage", 
-    suffix="m2",
+    suffix="m^2",
     default=0, 
     min=0,
     max=500,
@@ -159,13 +176,13 @@ class Parametrization(ViktorParametrization):
 
   step_2.textA3 = Text ("""## BIPV-Anlage Fassadenintegriert
   Diese Anlage wird in die Fassade/ Wandfläche eines Gebäudes integriert, 
-  die Photovoltaikmodule erzeugen dabei elektrische Energie der im Gebäude genutzt werden oder eingespeist werden kann.
+  die Photovoltaikmodule erzeugen dabei elektrische Energie, die im Gebäude genutzt oder eingespeist werden kann.
     """
   )
 
   step_2.Area3 = NumberField(
     "Fläche der PV-Anlage", 
-    suffix="m2", 
+    suffix="m^2", 
     default=0,
     min=0,
     max=500,
@@ -179,14 +196,14 @@ class Parametrization(ViktorParametrization):
 
   step_2.textA4 = Text ("""## BIPVT-Anlage Fassadenintegriert
   Diese Anlage wird in die Fassade/ Wandfläche eines Gebäudes integriert, 
-  die Photovoltaikmodule erzeugen dabei elektrische Energie der im Gebäude genutzt werden oder eingespeist werden kann.
+  die Photovoltaikmodule erzeugen dabei elektrische Energie, die im Gebäude genutzt oder eingespeist werden kann.
   Zusätzlich wird über innenliegende Kollektoren thermische Energie erzeugt.
     """
   )
 
   step_2.Area4 = NumberField(
     "Fläche der PV-Anlage", 
-    suffix="m2", 
+    suffix="m^2", 
     default=0,
     min=0,
     max=500,
@@ -199,9 +216,10 @@ class Parametrization(ViktorParametrization):
   )
 
   step_2.textb = Text ("""
-  Neben den Angaben zu den Flächen, Ausrichtungen und Neigungen ist Bestimmung des Inbetriebenahmezeitpunktes der Anlage relevant.
-  Durch die Auswahl eines Stromspeichers kann der nutzbare Anteil der elektrischen Energie. 
-  Die weiteren Angaben zum Elektroauto und die Ladestationen für diese sind für mögliche Förderungen der KfW erforderlich. """)
+  Neben den Angaben zu den Flächen, Ausrichtungen und Neigungen ist die Bestimmung des Inbetriebenahmezeitpunktes der Anlage relevant.
+
+  Durch die Auswahl eines Stromspeichers kann der nutzbare Anteil an der elektrischen Energie gesteigert werden. 
+  """)
   
   step_2.Inbetrieb = OptionField(
     "Inbetriebnahme-Zeitpunkt der Anlage", 
@@ -215,38 +233,25 @@ class Parametrization(ViktorParametrization):
     variant='radio-inline',
     description="Soll ein Stromspeicher für Ihre Anlage eingeplant werde? Durch einen Stromspeicher kann ein höherer Anteil des produzierten Stroms verwendet werden (vgl. Lastmanagement)",
   )
-  step_2.textc = Text(" ")
-
-  step_2.Förder1 = OptionField(
-    "Elektroauto im Haushalt",
-    options=["ja","nein"],
-    default="nein",
-    description="Ist eine im Haushalt lebende Person in Besitz eines Elektroautos? (Hybridfahrzeuge und Leasing sind nicht eingeschlossen)"
-  )
-  step_2.Förder2 = OptionField(
-    "Ladesäule für Elektromobilität", 
-    options=["ja", "nein"],
-    default="nein",
-    description="Wollen Sie eine Ladesäule für Elektromobilität bauen und bei der Wirtschaftlichkeitsberechnung berücksichtigen?"
-  )
 
   step_3 = Step("Ergebnisse",views=["get_plotlyÖko1_view", "get_plotlyÖko2_view", "get_plotlyWirt_view"])
 
-  step_3.text4 = Text (
-    """# Ergebnisse
+  step_3.text4 = Text ("""# Ergebnisse
+
   In diesem Schritt werden die Ergebnisse aus allen zuvor getätigen Angaben berechnet. 
   Durch die auf der rechten Seite dargestellten Kennzahlen soll Ihnen die Entscheidung für oder gegen die eingestellte Anlage auf Basis wissenschaftlicher Kennzahlen erleichtert werden. 
 
   Es ist jederzeit möglich über 'Previous step' zurück zur Anlagenkonfiguration zu gelangen und die Eingangswerte zu ändern. 
-  Dadurch können Sie verschiedene für Sie mögliche Konfigurationen vergleichen. 
+  Dadurch können Sie verschiedene Konfigurationen vergleichen. 
     
   ## Ökologische Kennzahlen
   In den ökologischen Kennzahlen, dem Primärenergieverbrauch und dem CO2-Äquivalent,
-  finden Sie Vergleichswerte darüber, wie viel Primärenergie und CO2-Äquivalent durch eine BIPV(T)-Anlage eingespart werden können. 
+  finden Sie Vergleichswerte darüber, wie viel Primärenergie und CO2-Äquivalent während der Nutzungsphase durch eine BIPV(T)-Anlage eingespart werden können. 
   Dadurch soll verdeutlicht werden, dass bei einer Investitionsentscheidung nicht nur wirtschaftliche Faktoren relevant sind, 
   sondern auch die ökologischen Auswirkungen berücksichtigt werden sollten. 
-    
-  ## Wirtschaftliche Kennzahlen
+  """
+  )
+  step_3.texty =Text (""" ## Wirtschaftliche Kennzahlen
   In den wirtschaftlichen Kennzahlen finden Sie die Ergebnisse der Amortisationsrechnung.
   Der Break-Even-Point wird sowohl in einer graphischen Darstellung als auch als Wert ausgegeben. 
   Dieser gibt an nach wie vielen Jahre die Investitionskosten durch Erträge wieder eingenommen wurden und
@@ -254,14 +259,14 @@ class Parametrization(ViktorParametrization):
     
   Bei der Berechnung der Wirtschaftlichkeit wurden Einsparungen berücksichtigt, die den Vergleich zu einem Gebäude ohne solarthermische oder PV-Anlage herstellen.
   Dabei wurden in den Investitionskosten für Neubauten und Sanierungen die Einsparungen aus nicht erforderlichen Dacheindeckungen und Fassadenverkleidungen einbezogen. 
-  Bei den laufenden Kosten wurden darüber hinaus die Einsparungen aus nicht erforderlichen Energien aus dem Netz berücksichtigt.  
-  """
-  )
+  Ebenfalls ist in den Investitionskosten die BEG Förderung berücksichtigt, sofern die Vorraussetzungen für diese erfüllt sind. 
+  Bei den laufenden Kosten wurden darüber hinaus die Einsparungen aus nicht erforderlichen Energien aus dem Netz berücksichtigt. 
+  """)
   step_4 = Step("Abschluss",views=["whats_next"])
   
   step_4.text5 = Text("""
   ## Vielen Dank
   für Ihr Interesse an BIPV(T)-Anlagen 
-  und ich wünsche Ihnen viel Erfolg bei der Konfiguration der richtigen Anlage für Ihren speziellen Nutzen. 
+  und viel Erfolg bei der Konfiguration der richtigen Anlage für Ihren speziellen Nutzen. 
     """
   )
